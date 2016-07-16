@@ -1,0 +1,9 @@
+@import "./black.css";
+
+body {
+  background-color: #000;
+}
+
+.reveal code {
+  font-family: Ricty, Consolas, monospace;
+}
