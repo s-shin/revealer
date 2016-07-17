@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>reveal.js</title>
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="assets/reveal/lib/css/zenburn.css">
+
+    <link rel="stylesheet" href="assets/reveal/css/reveal.css">
+    <link rel="stylesheet" href="{{.Theme.RoutePath}}">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match(/print-pdf/gi) ? 'assets/reveal/css/print/pdf.css' : 'assets/reveal/css/print/paper.css';
+      document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section data-markdown="__slide__.md"
+                 data-separator="{{.Separator.Horizontal}}"
+                 data-separator-vertical="{{.Separator.Vertical}}"
+                 data-separator-notes="{{.Separator.Note}}">
+        </section>
+      </div>
+    </div>
+
+    <script src="assets/reveal/lib/js/head.min.js"></script>
+    <script src="assets/reveal/js/reveal.js"></script>
+
+    <script>
+      // More info https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        history: true,
+
+        // More info https://github.com/hakimel/reveal.js#dependencies
+        dependencies: [
+          { src: 'assets/reveal/plugin/markdown/marked.js' },
+          { src: 'assets/reveal/plugin/markdown/markdown.js' },
+          { src: 'assets/reveal/plugin/notes/notes.js', async: true },
+          { src: 'assets/reveal/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'assets/reveal/plugin/math/math.js', async: true }
+        ]
+      });
+    </script>
+  </body>
+</html>

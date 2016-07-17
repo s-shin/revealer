@@ -30,3 +30,22 @@ func GetEmojiImageHref(name string) (string, error) {
 	}
 	return "", errors.New("image of the name not found: " + name)
 }
+
+//---
+
+type RoutableAsset struct {
+	Path string
+}
+
+func NewRoutableAsset(path string) *RoutableAsset {
+	return &RoutableAsset{path}
+}
+
+func (a *RoutableAsset) Load() ([]byte, error) {
+	return Asset(a.Path)
+}
+
+// RoutePath is a function of RoutePath interface.
+func (a *RoutableAsset) RoutePath() string {
+	return "/" + a.Path
+}

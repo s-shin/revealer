@@ -17,6 +17,10 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
+type RoutePath interface {
+	RoutePath() string
+}
+
 // RunServer runs server with options.
 func RunServer(config *Config) {
 	e := echo.New()
@@ -25,43 +29,60 @@ func RunServer(config *Config) {
 	e.Use(middleware.Recover())
 
 	e.GET("/", func(c echo.Context) error {
-		data, err := Asset("assets/index.html")
+		data, err := config.Mode.TemplateAsset().Load()
+		if err != nil {
+			panic(err)
+		}
+		t, err := template.New(config.Mode.String()).Parse(string(data[:]))
 		if err != nil {
 			return err
 		}
-		t, err := template.New("index").Parse(string(data[:]))
-		if err != nil {
-			return err
+		switch config.Mode {
+		case ModeNormal:
+			return t.Execute(c.Response().Writer(), config)
+		case ModeAggressive:
+			markdown := mustLoadSlideMarkdown(config.SlideFilePath)
+			sections := NewAggressiveMode(config).ConvertMarkdown(markdown)
+			return t.Execute(c.Response().Writer(), &struct {
+				Config        *Config
+				SlideSections [][]*SlideSection
+			}{
+				Config:        config,
+				SlideSections: sections,
+			})
 		}
-		return t.Execute(c.Response().Writer(), config)
+		panic("error")
 	})
 
-	emojiReplacer := mustCreateReplacerForEmojiInMarkdown()
+	if config.Mode == ModeNormal {
+		e.GET("/__slide__.md", func(c echo.Context) error {
+			markdown := mustLoadSlideMarkdown(config.SlideFilePath)
+			return c.String(http.StatusOK, markdown)
+		})
+	}
 
-	e.GET("/__slide__.md", func(c echo.Context) error {
-		data, err := ioutil.ReadFile(config.SlideFilePath)
-		if err != nil {
-			return err
-		}
-		_, err = emojiReplacer.WriteString(c.Response().Writer(), string(data[:]))
-		return err
-	})
-
-	if config.Theme.IsCustom() {
-		e.GET(config.Theme.Href(), func(c echo.Context) error {
+	if config.Theme.Type == ThemeTypeCustom {
+		e.GET(config.Theme.RoutePath(), func(c echo.Context) error {
 			return respondStatic(config.Theme.String(), c)
 		})
 	}
 
 	e.GET("/"+BaseRevealAssetPath+"/*", func(c echo.Context) error {
 		path := c.Request().URL().Path()
-		fmt.Println(path)
 		return respondRevealAsset(path[1:], c)
 	})
 
 	e.Static("/", config.Docroot)
 
 	e.Run(standard.New(":3000"))
+}
+
+func mustLoadSlideMarkdown(path string) string {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	return string(data)
 }
 
 func respondStatic(path string, c echo.Context) error {
