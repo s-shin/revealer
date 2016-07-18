@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -9,8 +8,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
-	"unicode/utf8"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -74,7 +71,8 @@ func RunServer(config *Config) {
 
 	e.Static("/", config.Docroot)
 
-	e.Run(standard.New(":3000"))
+	fmt.Printf("Server started. Let's open http://localhost:%d/ in browser.\n", config.Port)
+	e.Run(standard.New(fmt.Sprintf(":%d", config.Port)))
 }
 
 func mustLoadSlideMarkdown(path string) string {
@@ -106,52 +104,4 @@ func respondRevealAsset(path string, c echo.Context) error {
 	res.Header().Set("Content-Type", mime.TypeByExtension(filepath.Ext(path)))
 	res.Write(data)
 	return nil
-}
-
-func mustCreateReplacerForEmojiInMarkdown() *strings.Replacer {
-	replacer, err := createReplacerForEmojiInMarkdown()
-	if err != nil {
-		panic(err)
-	}
-	return replacer
-}
-
-func createReplacerForEmojiInMarkdown() (*strings.Replacer, error) {
-	data, err := Asset(BaseGemojiAssetPath + "/db/emoji.json")
-	if err != nil {
-		return nil, err
-	}
-	type Emoji struct {
-		Emoji       string
-		Description string
-		Aliases     []string
-		Tags        []string
-	}
-	var emojis []Emoji
-	if err := json.Unmarshal(data, &emojis); err != nil {
-		panic(err)
-	}
-	oldnew := make([]string, 0, len(emojis)*2)
-	for _, emoji := range emojis {
-		fileName := ""
-		if len(emoji.Emoji) > 0 {
-			r, _ := utf8.DecodeRuneInString(emoji.Emoji)
-			fileName = fmt.Sprintf("%x", r)
-		}
-		for _, alias := range emoji.Aliases {
-			if fileName == "" {
-				fileName = alias
-			}
-			href, err := GetEmojiImageHref(fileName)
-			if err != nil {
-				continue
-			}
-			oldnew = append(
-				oldnew,
-				":"+alias+":",
-				fmt.Sprintf("<img src='%s' />", href),
-			)
-		}
-	}
-	return strings.NewReplacer(oldnew...), nil
 }

@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"text/template"
 	"unicode/utf8"
@@ -84,6 +85,7 @@ func main() {
 		for alias := range emojiMapping {
 			aliases = append(aliases, strings.Replace(regexp.QuoteMeta(alias), "\\", "\\\\", -1))
 		}
+		sort.Sort(sort.StringSlice(aliases))
 		t.Execute(fd, &struct {
 			EmojiMapping map[string]string
 			AliasesStr   string

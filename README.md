@@ -22,7 +22,7 @@ revealer slide.md
 revealer \
   --mode=aggressive \
   --theme=examples/custom-theme.css \
-  --separator-horizontal='^<!-- --- -->' --separator-vertical='^<!-- ___ -->' --separator-note='^Notes:' \
+  --separator-horizontal='^<!-- --- -->' --separator-vertical='^<!-- ___ -->' --separator-note='^Note:' \
   README.md
 
 # View other options and help text.

@@ -84,7 +84,7 @@ VERSION:
 	app.Run(os.Args)
 }
 
-func action(c *cli.Context) {
+func action(c *cli.Context) error {
 	args := c.Args()
 	if len(args) != 1 {
 		fmt.Printf("ERROR: one argument required.\n\n")
@@ -118,4 +118,5 @@ func action(c *cli.Context) {
 	}
 
 	RunServer(config)
+	return nil
 }

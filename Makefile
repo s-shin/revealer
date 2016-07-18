@@ -23,7 +23,7 @@ build: clean emoji asset
 
 .PHONY: clean
 clean:
-	rm assets.go revealer emoji.go
+	rm -f assets.go revealer emoji.go
 
 .PHONY: build_debug
 build_debug:
