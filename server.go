@@ -7,7 +7,9 @@ import (
 	"mime"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -64,12 +66,13 @@ func RunServer(config *Config) {
 		})
 	}
 
-	e.GET("/"+BaseRevealAssetPath+"/*", func(c echo.Context) error {
-		path := c.Request().URL().Path()
-		return respondRevealAsset(path[1:], c)
+	e.GET("/*", func(c echo.Context) error {
+		p := c.P(0)
+		if strings.HasPrefix(p, BaseRevealAssetPath) {
+			return respondRevealAsset(p, c)
+		}
+		return c.File(path.Join(config.Docroot, p))
 	})
-
-	e.Static("/", config.Docroot)
 
 	fmt.Printf("Server started. Let's open http://localhost:%d/ in browser.\n", config.Port)
 	e.Run(standard.New(fmt.Sprintf(":%d", config.Port)))
