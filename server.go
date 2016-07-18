@@ -68,8 +68,11 @@ func RunServer(config *Config) {
 
 	e.GET("/*", func(c echo.Context) error {
 		p := c.P(0)
+		if strings.HasPrefix(p, BaseGemojiAssetPath) {
+			return respondAsset(p, c)
+		}
 		if strings.HasPrefix(p, BaseRevealAssetPath) {
-			return respondRevealAsset(p, c)
+			return respondAsset(p, c)
 		}
 		return c.File(path.Join(config.Docroot, p))
 	})
@@ -98,7 +101,7 @@ func respondStatic(path string, c echo.Context) error {
 	return c.ServeContent(fd, fi.Name(), fi.ModTime())
 }
 
-func respondRevealAsset(path string, c echo.Context) error {
+func respondAsset(path string, c echo.Context) error {
 	data, err := Asset(path)
 	if err != nil {
 		return c.String(http.StatusNotFound, err.Error())
